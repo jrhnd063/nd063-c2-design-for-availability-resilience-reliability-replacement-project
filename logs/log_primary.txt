@@ -1,0 +1,44 @@
+# Connect to server
+ssh -i keys/nd063-c2-kp.pem ec2-user@50.16.108.39
+# Install database client
+sudo dnf update -y
+sudo dnf install -y mariadb105
+# Connect to MySQL instance, switch to the Udacity database and create a table, then insert data, then read data.
+[ec2-user@ip-172-16-1-117 ~]$ mysql -h primary-udacity-mysql-db.crd6aiz3xgx8.us-east-1.rds.amazonaws.com -u admin -p
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MySQL connection id is 51
+Server version: 8.0.32 Source distribution
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MySQL [(none)]> USE udacity;
+Database changed
+MySQL [udacity]> CREATE TABLE users (
+    ->     id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     first_name VARCHAR(255) NOT NULL,
+    ->     last_name VARCHAR(255) NOT NULL,
+    ->     date_of_birth DATE NOT NULL
+    -> );
+Query OK, 0 rows affected (0.060 sec)
+
+MySQL [udacity]> INSERT INTO users (first_name, last_name, date_of_birth)
+    -> VALUES
+    ->     ('Jean-Luc', 'Picard', '2305-07-13'),
+    ->     ('William', 'Riker', '2335-08-19'),
+    ->     ('Deanna', 'Troi', '2336-03-29'),
+    ->     ('Data', '', '2338-02-02');
+Query OK, 4 rows affected (0.010 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+MySQL [udacity]> SELECT * FROM users WHERE last_name = 'Picard';
++----+------------+-----------+---------------+
+| id | first_name | last_name | date_of_birth |
++----+------------+-----------+---------------+
+|  1 | Jean-Luc   | Picard    | 2305-07-13    |
++----+------------+-----------+---------------+
+1 row in set (0.002 sec)
+
+MySQL [udacity]>

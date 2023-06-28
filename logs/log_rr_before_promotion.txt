@@ -1,0 +1,32 @@
+# Connect to server
+ssh -i keys/alt-nd063-c2-kp.pem ec2-user@54.148.217.118
+# Install database client
+sudo dnf update -y
+sudo dnf install -y mariadb105
+# Connect to MySQL instance, switch to the Udacity database and fail to insert data into replica, then read data.
+[ec2-user@ip-10-1-10-60 ~]$ mysql -h secondary-udacity-mysql-db.ccrfrcgix76v.us-west-2.rds.amazonaws.com -u admin -p
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MySQL connection id is 50
+Server version: 8.0.32 Source distribution
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+MySQL [(none)]> USE udacity;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+MySQL [udacity]> INSERT INTO users (first_name, last_name, date_of_birth)
+    -> VALUES ('Geordi', 'La Forge', '2335-02-16');
+ERROR 1290 (HY000): The MySQL server is running with the --read-only option so it cannot execute this statement
+MySQL [udacity]> SELECT * FROM users WHERE last_name = 'Picard';
++----+------------+-----------+---------------+
+| id | first_name | last_name | date_of_birth |
++----+------------+-----------+---------------+
+|  1 | Jean-Luc   | Picard    | 2305-07-13    |
++----+------------+-----------+---------------+
+1 row in set (0.001 sec)
+
+MySQL [udacity]>

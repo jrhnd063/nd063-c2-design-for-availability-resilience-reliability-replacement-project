@@ -1,0 +1,23 @@
+1. Minimum RTO for a single AZ outage
+
+The minimum RTO that can be achieved for a single AZ outage is not a function of staff availability, since it is an automated process. The documentation for a Multi-AZ instance deployment[1] states that failover between AZs is "typically 60–120 seconds", but "depends on the database activity and other conditions at the time the primary DB instance became unavailable" and "large transactions or a lengthy recovery process can increase failover time". Therefore it would be best to test and measure fail-overs for the particular application and database, but an RTO of 5 minutes should be conservative enough for the vast majority of cases.
+
+2. Minimum RTO for a single region outage
+
+The minimum RTO that can be achieved for a single region outage is dependent on staff availability, since it the promotion of a read replica in another region is a manual process. Let's assume appropriate monitoring and alerting of the primary is configured such and that staff are on call to be woken up during the night by the alerts, and that those staff have appropriate authorisations to promote the replica to primary upon identifying the primary region is down.
+
+This being the case, by the time an alert has been triggered, received, and a conscious staff member with the correct training is online, something like 20 minutes may have passed. If the AWS Region is out, the staff member would not take long to diagnose the issue, and might begin promoting the read replica within 5 minutes. The process of promoting the read replica should take a few minutes, while reconfiguring any applications to point away from the offline primary to the promoted secondary would partly be a function of the number of applications and whether DNS records were used. But in general terms it would be reasonable to add another half an hour for this process and to set an RTO of 1 hour.
+
+3. Minimum RPO for a single AZ outage
+
+The minimum RPO should be near zero, since a Multi-AZ instance is replicated synchronously within the same region. However, this does depend on how the application is architected: if it does not handle an error in a way that prevents the user from losing any data they have tried to save during the failover, then a small amount of data could be lost. But if everything is architected robustly, no data should be lost.
+
+4. Minimum RPO for a single region outage
+
+The minimum RPO for a region outage is dependent on the replication lag between the primary and secondary, since the secondary read replica uses asynchronous replication. It's possible to monitor the replication lag in CloudWatch to get a sense of this value for a particular database and workload[2]. According to Amazon's guidance[3], this should typically be under 1 second. In the absence of metrics on the replication lag, it seems an RPO of 10 seconds would be a conservative enough objective.
+
+[1]
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html
+
+[2]
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html#USER_ReadRepl.Monitoring.Lag
